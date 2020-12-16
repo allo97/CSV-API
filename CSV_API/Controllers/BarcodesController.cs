@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace CSV_API.Controllers
 {
@@ -27,11 +28,11 @@ namespace CSV_API.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(Exception), (int)HttpStatusCode.BadRequest)]
-        public IActionResult GetDuplicatedBarcodes(string pathToBillings, string resultsPath)
+        public async Task<IActionResult> GetDuplicatedBarcodes(string pathToBillings, string resultsPath)
         {
             try
             {
-                _csvService.GetDuplicatedBarcodes(@$"{pathToBillings}", @$"{resultsPath}\duplicatedBarcodes.csv");
+                await _csvService.GetDuplicatedBarcodes(@$"{pathToBillings}", @$"{resultsPath}\duplicatedBarcodes.csv");
                 return Ok(@$"Results has been saved to {resultsPath}\duplicatedBarcodes.csv");
             }
             catch (Exception ex)

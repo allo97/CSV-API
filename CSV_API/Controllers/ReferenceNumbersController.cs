@@ -2,8 +2,10 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace CSV_API.Controllers
 {
@@ -28,13 +30,14 @@ namespace CSV_API.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(Exception), (int)HttpStatusCode.BadRequest)]
-        public IActionResult GetAllMissingNumbers(string pathToManifests, string pathToBillings, string resultsPath)
+        public async Task<IActionResult> GetAllMissingNumbers(string pathToManifests, string pathToBillings, string resultsPath)
         {
             try
             {
-                var result = _csvService.GetAllMissingNumbers(pathToManifests, pathToBillings);
-                _csvService.WriteToCsv(@$"{resultsPath}\allSearchResults.csv", result);
-                return Ok(@$"Results has been saved to {resultsPath}\allSearchResults.csv");
+                var result = await _csvService.GetAllMissingNumbers(pathToManifests, pathToBillings);
+                await _csvService.WriteToCsv(@$"{resultsPath}\allSearchResults.csv", result);
+                //return Ok(@$"Results has been saved to {resultsPath}\allSearchResults.csv");
+                return Ok(result);
             }
             catch (Exception ex)
             {
@@ -49,12 +52,12 @@ namespace CSV_API.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(Exception), (int)HttpStatusCode.BadRequest)]
-        public IActionResult GetMissingNumbersWithoutManifest(string pathToManifests, string pathToBillings, string resultsPath)
+        public async Task<IActionResult> GetMissingNumbersWithoutManifest(string pathToManifests, string pathToBillings, string resultsPath)
         {
             try
             {
-                var result = (_csvService.GetAllMissingNumbers(pathToManifests, pathToBillings)).Where(result => result.ManifestName == null);
-                _csvService.WriteToCsv(@$"{resultsPath}\searchResultsNoManifest.csv", result);
+                var result = (await _csvService.GetAllMissingNumbers(pathToManifests, pathToBillings)).Where(result => result.ManifestName == null);
+                await _csvService.WriteToCsv(@$"{resultsPath}\searchResultsNoManifest.csv", result);
                 return Ok(@$"Results has been saved to {resultsPath}\searchResultsNoManifest.csv");
             }
             catch (Exception ex)
@@ -70,12 +73,12 @@ namespace CSV_API.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(Exception), (int)HttpStatusCode.BadRequest)]
-        public IActionResult GetMissingNumbersWithManifest(string pathToManifests, string pathToBillings, string resultsPath)
+        public async Task<IActionResult> GetMissingNumbersWithManifest(string pathToManifests, string pathToBillings, string resultsPath)
         {
             try
             {
-                var result = (_csvService.GetAllMissingNumbers(pathToManifests, pathToBillings)).Where(result => result.ManifestReferenceNumber != "" && result.ManifestName != null);
-                _csvService.WriteToCsv(@$"{resultsPath}\searchResultsManifestWithRefNumbers.csv", result);
+                var result = (await _csvService.GetAllMissingNumbers(pathToManifests, pathToBillings)).Where(result => result.ManifestReferenceNumber != "" && result.ManifestName != null);
+                await _csvService.WriteToCsv(@$"{resultsPath}\searchResultsManifestWithRefNumbers.csv", result);
                 return Ok(@$"Results has been saved to {resultsPath}\searchResultsManifestWithRefNumbers.csv");
             }
             catch (Exception ex)
@@ -91,12 +94,12 @@ namespace CSV_API.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(Exception), (int)HttpStatusCode.BadRequest)]
-        public IActionResult GetMissingNumbersWithManifestWithoutRefNumbers(string pathToManifests, string pathToBillings, string resultsPath)
+        public async Task<IActionResult> GetMissingNumbersWithManifestWithoutRefNumbers(string pathToManifests, string pathToBillings, string resultsPath)
         {
             try
             {
-                var result = (_csvService.GetAllMissingNumbers(pathToManifests, pathToBillings)).Where(result => result.ManifestName != "" && result.ManifestReferenceNumber == "");
-                _csvService.WriteToCsv(@$"{resultsPath}\searchResultsManifestWithRefNumbers.csv", result);
+                var result = (await _csvService.GetAllMissingNumbers(pathToManifests, pathToBillings)).Where(result => result.ManifestName != "" && result.ManifestReferenceNumber == "");
+                await _csvService.WriteToCsv(@$"{resultsPath}\searchResultsManifestWithRefNumbers.csv", result);
                 return Ok(@$"Results has been saved to {resultsPath}\searchResultsManifestWithRefNumbers.csv");
             }
             catch (Exception ex)
@@ -109,11 +112,11 @@ namespace CSV_API.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(Exception), (int)HttpStatusCode.BadRequest)]
-        public IActionResult FixRefNumbers(string pathToManifests, string pathToBillings, string resultsPath)
+        public async Task<IActionResult> FixRefNumbers(string pathToManifests, string pathToBillings, string resultsPath)
         {
             try
             {
-                _csvService.FixRefNumbers(pathToManifests, pathToBillings, resultsPath);
+                await _csvService.FixRefNumbers(pathToManifests, pathToBillings, resultsPath);
                 return Ok(@$"Fixed BEFs have been saved to {resultsPath}");
             }
             catch (Exception ex)
